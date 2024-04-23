@@ -16,6 +16,7 @@ import com.sky.exception.PasswordErrorException;
 import com.sky.mapper.EmployeeMapper;
 import com.sky.result.PageResult;
 import com.sky.service.EmployeeService;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.DataFormat;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -104,6 +105,53 @@ public class EmployeeServiceImpl implements EmployeeService {
         //查询
         Page<Employee> page = employeeMapper.pageQuery(employeePageQueryDTO);
         return new PageResult(page.getTotal(), page.getResult());
+    }
+
+    /**
+     * 启用禁用员工账号
+     * @param id
+     * @param status
+     */
+    @Override
+    public void changeStatus(Long id, Integer status) {
+        Employee employee = Employee.builder()
+                            .id(id)
+                            .status(status).build();
+        //员工状态是否为status
+
+        //更改员工账号状态
+        employeeMapper.update(employee);
+    }
+
+    /**
+     * 编辑员工信息
+     * @param employeeDTO
+     */
+    @Override
+    public void edit(EmployeeDTO employeeDTO) {
+        //属性拷贝
+        Employee employee = new Employee();
+        BeanUtils.copyProperties(employeeDTO, employee);
+        //操作者id
+        Long id = BaseContext.getCurrentId();
+        //更新时间
+        LocalDateTime now = LocalDateTime.now();
+        employee.setUpdateUser(id);
+        employee.setUpdateTime(now);
+
+        employeeMapper.update(employee);
+    }
+
+    /**
+     * 根据id查询员工
+     * @param id
+     * @return
+     */
+    @Override
+    public Employee findById(Long id) {
+        Employee employee = employeeMapper.find(id);
+        employee.setPassword("******");
+        return employee;
     }
 
 }
