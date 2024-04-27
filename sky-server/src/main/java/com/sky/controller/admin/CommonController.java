@@ -24,7 +24,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 
 @RestController
-@Api("通用接口")
+@Api(tags = "通用接口")
 @Slf4j
 public class CommonController {
     @Autowired

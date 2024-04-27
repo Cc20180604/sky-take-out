@@ -7,6 +7,8 @@ import com.sky.entity.Category;
 import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Select;
+
 import java.util.List;
 
 @Mapper
@@ -28,6 +30,12 @@ public interface CategoryMapper {
      */
     Page<Category> pageQuery(CategoryPageQueryDTO categoryPageQueryDTO);
 
+    /**
+     * 根据id查询分类
+     * @return
+     */
+    @Select("SELECT * from category where id = #{id}")
+    Category selectById(Long id);
     /**
      * 根据id删除分类
      * @param id
