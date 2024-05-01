@@ -2,6 +2,7 @@ package com.sky.handler;
 
 import com.sky.constant.MessageConstant;
 import com.sky.exception.BaseException;
+import com.sky.exception.DeletionNotAllowedException;
 import com.sky.result.Result;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -47,6 +48,29 @@ public class GlobalExceptionHandler {
             return Result.error(duplicateValue+MessageConstant.ALREADY_EXISTS);
         }
 
+        return Result.error(MessageConstant.UNKNOWN_ERROR);
+    }
+
+    /**
+     * 处理sql delete异常
+     * @param ex
+     * @return
+     */
+    @ExceptionHandler
+    public Result exceptionHandler(DeletionNotAllowedException ex){
+
+        String message = ex.getMessage();
+
+        if (message.contains(MessageConstant.DISH_ON_SALE)){
+            //起售菜品无法被删除
+            return Result.error(message);
+        } else if (message.contains(MessageConstant.DISH_BE_RELATED_BY_SETMEAL)) {
+            //套餐中的菜品无法被删除
+            return Result.error(message);
+        } else if (message.contains(MessageConstant.DISH_ON_SALE)){
+            //菜品在套餐中 无法停售
+            return Result.error(message);
+        }
         return Result.error(MessageConstant.UNKNOWN_ERROR);
     }
 

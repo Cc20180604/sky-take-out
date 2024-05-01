@@ -50,4 +50,30 @@ public interface DishMapper {
      */
     @AutoFill(OperationType.UPDATE)
     void update(Dish dish);
+
+    /**
+     * 批量删除菜品
+     */
+    void deleteBatch(List<Long> dishIds);
+    /**
+     * 根据id查询菜品
+     * @param dishId
+     */
+    @Select("select * from dish where id = #{dishId}")
+    Dish selectById(Long dishId);
+
+    /**
+     * 批量查询菜品
+     * @param dishIds
+     * @return
+     */
+    List<Dish> selectByIds(List<Long> dishIds);
+
+    /**
+     * 根据菜品种类查询
+     * @param categoryId
+     * @return
+     */
+    @Select("select * from dish where category_id = #{categoryId}")
+    List<Dish> selectByCategoryId(Long categoryId);
 }

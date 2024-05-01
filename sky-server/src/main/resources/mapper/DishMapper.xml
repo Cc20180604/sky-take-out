@@ -22,6 +22,13 @@
         </set>
         WHERE id = #{id}
     </update>
+    <delete id="deleteBatch">
+        delete from dish where id in
+        <foreach collection="dishIds" open="(" close=")" separator="," item="dishId">
+            #{dishId}
+        </foreach>
+
+    </delete>
     <select id="pageQuery" resultType="com.sky.vo.DishVO">
         select dish.id, dish.name, dish.category_id, dish.price, dish.image, dish.description, dish.status, dish.update_time, category.name as category_name
         from dish left join category on dish.category_id = category.id
@@ -37,7 +44,7 @@
             </if>
 
         </where>
-        order by dish.category_id asc , dish.status asc
+        order by dish.create_time asc , dish.status asc
     </select>
 
     <select id="selectDishVOById" resultType="com.sky.vo.DishVO">
@@ -45,5 +52,11 @@
         from dish left join category on dish.category_id = category.id
         where dish.id = #{dishId}
         order by dish.category_id asc , dish.status asc
+    </select>
+    <select id="selectByIds" resultType="com.sky.entity.Dish">
+        select * from dish where id in
+        <foreach collection="dishIds" open="(" close=")" separator="," item="dishId">
+            #{dishId}
+        </foreach>
     </select>
 </mapper>
