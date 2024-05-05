@@ -46,4 +46,10 @@ public interface CategoryService {
      * @return
      */
     List<Category> list(Integer type);
+
+    /**
+     * 根据查询所有分类
+     * @return
+     */
+    List<Category> list();
 }

@@ -55,4 +55,9 @@
             #{categoryId}
         </foreach>
     </select>
+    <select id="selectAllInSale" resultType="com.sky.entity.Category">
+        select * from category
+        where status = 1
+        order by sort asc,create_time desc
+    </select>
 </mapper>

@@ -22,9 +22,20 @@ public class MessageConstant {
     public static final String DISH_ON_SALE = "起售中的菜品不能删除";
     public static final String SETMEAL_ON_SALE = "起售中的套餐不能删除";
     public static final String DISH_BE_RELATED_BY_SETMEAL = "当前菜品关联了套餐,不能删除";
+
     public static final String ORDER_STATUS_ERROR = "订单状态错误";
     public static final String ORDER_NOT_FOUND = "订单不存在";
 
     public static final String IMG_NOT_FOUND = "图片不存在";
+
+    public static final String TYPE_NOT_FOUND = "分类不存在";
+
+    public static final String SETMEAL_NOT_FOUND = "套餐不存在";
+
+
+    public static final String DISH_IN_ENABLE_SETMEA_PREFIX = "在套餐中无法被停售:";
+    public static final String DISH_IN_ENABLE_SETMEA(String setmealName){
+        return DISH_IN_ENABLE_SETMEA_PREFIX+"该菜品在【"+setmealName+"】中无法被停售";
+    }
 
 }

@@ -20,16 +20,23 @@ import org.apache.commons.io.IOUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
+
+import static com.sky.constant.MessageConstant.DISH_IN_ENABLE_SETMEA;
 
 @Service
 @Slf4j
 public class DishServiceImpl implements DishService {
+    @Autowired
+    RedisTemplate redisTemplate;
     @Autowired
     private DishMapper dishMapper;
     @Autowired
@@ -44,6 +51,7 @@ public class DishServiceImpl implements DishService {
      */
     @Override
     @Transactional
+    @CacheEvict(cacheNames = "dish", key = "#dishDTO.categoryId")
     public void saveWithFlavor(DishDTO dishDTO) {
         //存储菜品
         Dish dish = new Dish();
@@ -62,6 +70,9 @@ public class DishServiceImpl implements DishService {
             dishFlavorMapper.insertBatch(dishFlavors);
         }
 
+        //删除分类缓存
+        //String redisKey = "dish_"+dishDTO.getCategoryId();
+        //redisTemplate.delete(redisKey);
     }
     /**
      * 分页查询菜品
@@ -100,6 +111,7 @@ public class DishServiceImpl implements DishService {
         dishVO.setFlavors(flavors);
         return dishVO;
     }
+
     /**
      * 根据菜品种类id查询菜品
      * @param categoryId
@@ -113,11 +125,65 @@ public class DishServiceImpl implements DishService {
     }
 
     /**
+     * 根据分类id获取所有菜品vo
+     * @param categoryId
+     * @return
+     */
+    @Override
+    @Cacheable(cacheNames = "dish", key = "#categoryId")
+    public List<DishVO> selectDishVOListByCategoryId(Long categoryId) {
+        String dishVOListKey = "dish_"+categoryId;
+        //ValueOperations valueOperations = redisTemplate.opsForValue();
+        //List<DishVO> dishVOList = (List<DishVO>) valueOperations.get(dishVOListKey);
+        /*************在缓存中, 直接返回缓存中的数据*************/
+        //if (dishVOList != null && !dishVOList.isEmpty()){
+        //    return dishVOList;
+        //}
+
+
+        /*************不在缓存中, 从数据库获取然后加入缓存中*************/
+        List<Dish> dishList = dishMapper.selectByCategoryId(categoryId);
+        //所有dishId
+        List<Long> dishIdList = new ArrayList<>();
+        for (Dish dish : dishList){
+            dishIdList.add(dish.getId());
+        }
+
+        //菜品对应口味list
+        List<DishFlavor> dishFlavorList = dishFlavorMapper.selectByDishIds(dishIdList);
+        Map<Long, List<DishFlavor>> flavorMap = new HashMap<>();
+        for (DishFlavor dishFlavor : dishFlavorList){
+            Long dishId = dishFlavor.getDishId();
+            //map中没有该菜品
+            if (!flavorMap.containsKey(dishId)){
+                List<DishFlavor> thisDishFlavors = new ArrayList<>();
+                thisDishFlavors.add(dishFlavor);
+                flavorMap.put(dishId, thisDishFlavors);
+            }else {
+                flavorMap.get(dishId).add(dishFlavor);
+            }
+        }
+        //将菜品与对应口味 转为dishVO
+        List<DishVO> dishVOList = new ArrayList<>();
+        for(Dish dish : dishList){
+            DishVO dishVO = new DishVO();
+            BeanUtils.copyProperties(dish,dishVO);
+            //加入菜品口味
+            dishVO.setFlavors(flavorMap.get(dish.getId()));
+            dishVOList.add(dishVO);
+        }
+        //加入缓存
+        //valueOperations.set(dishVOListKey, dishVOList);
+        return dishVOList;
+    }
+
+    /**
      * 更新菜品信息
      * @param dishDTO
      */
     @Override
     @Transactional
+    @CacheEvict(cacheNames = "dish", allEntries = true)
     public void update(DishDTO dishDTO) {
         //更新菜品表
         Dish dish = new Dish();
@@ -136,6 +202,9 @@ public class DishServiceImpl implements DishService {
             }
             dishFlavorMapper.insertBatch(flavors);
         }
+
+        //删除全部分类缓存
+        cleanCache("dish_*");
     }
     /**
      * 批量删除菜品和对应口味
@@ -143,6 +212,7 @@ public class DishServiceImpl implements DishService {
      */
     @Override
     @Transactional
+    @CacheEvict(cacheNames = "dish", allEntries = true)
     public void deleteDishesAndFlavors (List<Long> dishIds) {
         List<Dish> dishes = dishMapper.selectByIds(dishIds);
         for (Dish dish : dishes){
@@ -175,17 +245,23 @@ public class DishServiceImpl implements DishService {
         dishMapper.deleteBatch(dishIds);
         //删除所有对应的口味
         dishFlavorMapper.deleteBatch(dishIds);
+
+
+
+        //删除全部分类缓存
+        cleanCache("dish_*");
     }
     /**
      * 改变菜品状态
      * @param status
      */
     @Override
+    @CacheEvict(cacheNames = "dish", allEntries = true)
     public void status(Long id, Integer status) {
         //停售操作
-        //停售需要该菜品不在套餐中/套餐已停售
-        if (status == StatusConstant.DISABLE){
-            List<SetmealDish> setmealDishes = setmealDishMapper.selectByDishId(id);
+        List<SetmealDish> setmealDishes = setmealDishMapper.selectByDishId(id);
+        //停售需要该菜品套餐 已停售/不在套餐中
+        if (status == StatusConstant.DISABLE && !setmealDishes.isEmpty()){
 
             //菜品所有对应的套餐id
             List<Long> setmealIds = new ArrayList<>();
@@ -199,14 +275,12 @@ public class DishServiceImpl implements DishService {
             //该菜品在套餐中
             if (setmeals != null && !setmeals.isEmpty()){
                 //查询是否有启售的套餐
-                //TODO 未测试套餐中的菜品能被删除
                 for (Setmeal setmeal : setmeals){
-                    if (setmeal.getStatus() != StatusConstant.ENABLE){
-                        String dishName = dishMapper.selectById(id).getName();
-                        String setmealName = setmeal.getName();
-                        String message = MessageConstant.DISH_ON_SALE+": 套餐【"+setmealName+"】启售中, 菜品【"+dishName+"】无法被删除";
-                        log.error(message);
-                        throw new DeletionNotAllowedException(message);
+                    //菜品在启售的套餐中无法被停售
+                    if (setmeal.getStatus() == StatusConstant.ENABLE){
+                        String tips = DISH_IN_ENABLE_SETMEA(setmeal.getName());
+                        log.error(tips);
+                        throw new DeletionNotAllowedException(tips);
                     }
                 }
 
@@ -233,5 +307,17 @@ public class DishServiceImpl implements DishService {
         Dish dish = Dish.builder().id(id).status(status).build();
         dishMapper.update(dish);
 
+        //删除全部分类缓存
+        //cleanCache("dish_*");
+
+
+    }
+
+    /**
+     * 清除redis缓存
+     * @param pattern
+     */
+    private void cleanCache(String pattern){
+        redisTemplate.delete(redisTemplate.keys(pattern));
     }
 }

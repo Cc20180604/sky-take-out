@@ -3,8 +3,10 @@ package com.sky.service;
 import com.github.pagehelper.Page;
 import com.sky.dto.SetmealDTO;
 import com.sky.dto.SetmealPageQueryDTO;
+import com.sky.entity.Dish;
 import com.sky.entity.Setmeal;
 import com.sky.result.PageResult;
+import com.sky.vo.DishItemVO;
 import com.sky.vo.SetmealVO;
 import org.springframework.stereotype.Service;
 
@@ -47,4 +49,17 @@ public interface SetmealService {
      * @param status
      */
     void setStatus( Long id, Integer status);
+
+    /**
+     * 根据分类id获取套餐list
+     * @param categoryId
+     */
+    List<Setmeal> getByCategoryId(String categoryId);
+
+    /**
+     * 获取套餐内的所有菜品
+     * @param id
+     * @return
+     */
+    List<DishItemVO> getDishesBySetmealId(Long id);
 }

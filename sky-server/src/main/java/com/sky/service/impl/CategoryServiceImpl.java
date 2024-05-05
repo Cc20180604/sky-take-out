@@ -129,4 +129,13 @@ public class CategoryServiceImpl implements CategoryService {
     public List<Category> list(Integer type) {
         return categoryMapper.list(type);
     }
+
+    /**
+     * 查询所有出售中的分类
+     * @return
+     */
+    @Override
+    public List<Category> list() {
+        return categoryMapper.selectAllInSale();
+    }
 }

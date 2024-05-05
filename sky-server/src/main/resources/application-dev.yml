@@ -10,6 +10,10 @@ sky:
     host: localhost
     port: 6379
     database: 0
+# 微信
+  wechat:
+    appid: wxff28b542ad569d79
+    secret: 7965f23b5e1ced70aa0b98eb04a30273
 #文件上传
 file:
   location: http://localhost:8080/

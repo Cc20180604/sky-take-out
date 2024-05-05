@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.sky.mapper.ShoppingCartMapper">
+    <!-- 新增菜品 -->
+    <insert id="insert">
+        insert into shopping_cart (name, image, user_id, dish_id, setmeal_id, dish_flavor, number, amount, create_time) VALUES (#{name}, #{image}, #{userId}, #{dishId}, #{setmealId}, #{dishFlavor}, #{number}, #{amount}, #{createTime})
+    </insert>
+    <!-- 动态更新购物车数据 -->
+    <update id="update">
+        update shopping_cart
+        <set>
+            <if test="name != null">name = #{name},</if>
+            <if test="userId != null">user_id = #{userId},</if>
+            <if test="dishId != null">dish_id = #{dishId},</if>
+            <if test="setmealId != null">setmeal_id = #{setmealId},</if>
+            <if test="dishFlavor != null">dish_flavor = #{dishFlavor},</if>
+            <if test="number != null">number = #{number},</if>
+            <if test="amount != null">amount = #{amount},</if>
+            <if test="image != null">image = #{image},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+        </set>
+        where id = #{id}
+    </update>
+    <!-- 通过uid、套餐id或菜品id、口味数据查询购物车商品 -->
+    <select id="selectByUIDAndShoppingCard" resultType="com.sky.entity.ShoppingCart">
+        select * from shopping_cart
+        <where>
+            <if test="shoppingCartDTO.dishId != null">
+                and dish_id = #{shoppingCartDTO.dishId}
+            </if>
+            <if test="shoppingCartDTO.setmealId != null">
+                and setmeal_id = #{shoppingCartDTO.setmealId}
+            </if>
+            <if test="shoppingCartDTO.dishFlavor != null">
+                and dish_flavor = #{shoppingCartDTO.dishFlavor}
+            </if>
+            and user_id = #{uid}
+        </where>
+    </select>
+
+</mapper>

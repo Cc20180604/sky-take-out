@@ -35,7 +35,12 @@ public interface DishService {
      * @return
      */
     List<Dish> selectDishByCategoryId(Long categoryId);
-
+    /**
+     * 根据菜品种类id查询菜品vo集合
+     * @param categoryId
+     * @return
+     */
+    List<DishVO> selectDishVOListByCategoryId(Long categoryId);
     /**
      * 更新菜品与口味表
      * @param dishDTO

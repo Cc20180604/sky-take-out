@@ -21,7 +21,7 @@ import java.util.List;
 /**
  * 菜品管理
  */
-@RestController
+@RestController("AdminDishController")
 @RequestMapping("admin/dish")
 @Slf4j
 @Api(tags = "菜品接口")

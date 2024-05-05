@@ -67,9 +67,9 @@ public class GlobalExceptionHandler {
         } else if (message.contains(MessageConstant.DISH_BE_RELATED_BY_SETMEAL)) {
             //套餐中的菜品无法被删除
             return Result.error(message);
-        } else if (message.contains(MessageConstant.DISH_ON_SALE)){
+        } else if (message.contains(MessageConstant.DISH_IN_ENABLE_SETMEA_PREFIX)){
             //菜品在套餐中 无法停售
-            return Result.error(message);
+            return Result.error(message.substring(message.indexOf(":")+1));
         }
         return Result.error(MessageConstant.UNKNOWN_ERROR);
     }

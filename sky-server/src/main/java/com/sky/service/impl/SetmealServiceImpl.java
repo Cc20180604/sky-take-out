@@ -2,16 +2,22 @@ package com.sky.service.impl;
 
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
+import com.sky.constant.MessageConstant;
 import com.sky.dto.SetmealDTO;
 import com.sky.dto.SetmealPageQueryDTO;
 import com.sky.entity.Category;
+import com.sky.entity.Dish;
 import com.sky.entity.Setmeal;
 import com.sky.entity.SetmealDish;
+import com.sky.exception.BaseException;
 import com.sky.mapper.CategoryMapper;
+import com.sky.mapper.DishMapper;
 import com.sky.mapper.SetmealDishMapper;
 import com.sky.mapper.SetmealMapper;
 import com.sky.result.PageResult;
 import com.sky.service.SetmealService;
+import com.sky.vo.DishItemVO;
+import com.sky.vo.DishVO;
 import com.sky.vo.SetmealVO;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,6 +38,8 @@ public class SetmealServiceImpl implements SetmealService {
     private SetmealDishMapper setmealDishMapper;
     @Autowired
     private CategoryMapper categoryMapper;
+    @Autowired
+    private DishMapper dishMapper;
     /**
      * 新增套餐
      * @param setmealDTO
@@ -169,6 +177,52 @@ public class SetmealServiceImpl implements SetmealService {
 
         setmealMapper.update(setmeal);
 
+    }
+    /**
+     * 根据分类id获取套餐list
+     * @param categoryId
+     */
+    @Override
+    public List<Setmeal> getByCategoryId(String categoryId) {
+        List<Setmeal> setmealList = setmealMapper.selectByCategoryId(categoryId);
+        return setmealList;
+    }
+
+    /**
+     * 获取套餐内所有菜品
+     * @param id
+     * @return
+     */
+    @Override
+    public List<DishItemVO> getDishesBySetmealId(Long id) {
+        //获取该套餐的所有菜品关系
+        List<SetmealDish> setmealDishes = setmealDishMapper.selectBySetmealId(id);
+
+        //套餐不存在
+        if (setmealDishes.isEmpty()){
+            throw new BaseException(MessageConstant.SETMEAL_NOT_FOUND);
+        }
+
+
+        //获取该套餐下所有菜品id
+        List<Long> dishIds = new ArrayList<>();
+        for (SetmealDish setmealDish : setmealDishes){
+            dishIds.add(setmealDish.getDishId());
+        }
+        //查询所有菜品
+        List<Dish> dishes = dishMapper.selectByIds(dishIds);
+
+        //合并为dishItemVOS
+        List<DishItemVO> dishItemVOS = new ArrayList<>();
+        for (int i = 0; i<setmealDishes.size(); i++){
+            DishItemVO dishItemVO = new DishItemVO();
+            Dish dish = dishes.get(i);
+            SetmealDish setmealDish = setmealDishes.get(i);
+            BeanUtils.copyProperties(dish, dishItemVO);
+            dishItemVO.setCopies(setmealDish.getCopies());
+            dishItemVOS.add(dishItemVO);
+        }
+        return dishItemVOS;
     }
 
 }

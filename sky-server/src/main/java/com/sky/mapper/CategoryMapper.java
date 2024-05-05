@@ -58,6 +58,12 @@ public interface CategoryMapper {
     List<Category> list(Integer type);
 
     /**
+     * 查询所有出售中的分类
+     * @return
+     */
+    List<Category> selectAllInSale();
+
+    /**
      * 根据id
      * @param categoryIds
      * @return
