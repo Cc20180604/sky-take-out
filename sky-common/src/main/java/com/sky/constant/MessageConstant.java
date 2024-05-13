@@ -25,13 +25,13 @@ public class MessageConstant {
 
     public static final String ORDER_STATUS_ERROR = "订单状态错误";
     public static final String ORDER_NOT_FOUND = "订单不存在";
+    public static final String ORDER_CHANGE_NOT_ALLOWED = "无权操作该订单";
 
     public static final String IMG_NOT_FOUND = "图片不存在";
 
     public static final String TYPE_NOT_FOUND = "分类不存在";
 
     public static final String SETMEAL_NOT_FOUND = "套餐不存在";
-
 
     public static final String DISH_IN_ENABLE_SETMEA_PREFIX = "在套餐中无法被停售:";
     public static final String DISH_IN_ENABLE_SETMEA(String setmealName){

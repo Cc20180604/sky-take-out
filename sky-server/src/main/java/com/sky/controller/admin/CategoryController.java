@@ -16,7 +16,7 @@ import java.util.List;
 /**
  * 分类管理
  */
-@RestController
+@RestController("UserCategoryController")
 @RequestMapping("/admin/category")
 @Api(tags = "分类相关接口")
 @Slf4j
@@ -100,4 +100,5 @@ public class CategoryController {
         List<Category> list = categoryService.list(type);
         return Result.success(list);
     }
+
 }

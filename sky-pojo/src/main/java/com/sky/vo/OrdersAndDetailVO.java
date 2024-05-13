@@ -1,5 +1,6 @@
-package com.sky.entity;
+package com.sky.vo;
 
+import com.sky.entity.OrderDetail;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -8,15 +9,16 @@ import lombok.NoArgsConstructor;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 
 /**
- * 订单
+ * 订单和详情
  */
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class Orders implements Serializable {
+public class OrdersAndDetailVO implements Serializable {
 
     /**
      * 订单状态 1待付款 2待接单 3已接单 4派送中 5已完成 6已取消
@@ -107,4 +109,7 @@ public class Orders implements Serializable {
 
     //餐具数量状态  1按餐量提供  0选择具体数量
     private Integer tablewareStatus;
+
+    //订单详情
+    private List<OrderDetail> orderDetailList;
 }

@@ -128,6 +128,16 @@
                 <artifactId>knife4j-spring-boot-starter</artifactId>
                 <version>3.0.2</version>
             </dependency>
+            <dependency>
+                <groupId>org.apache.poi</groupId>
+                <artifactId>poi</artifactId>
+                <version>3.16</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.poi</groupId>
+                <artifactId>poi-ooxml</artifactId>
+                <version>3.16</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 </project>
